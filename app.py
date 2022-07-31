@@ -4,8 +4,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-	return render_template("cardtest.html")
+	return render_template("index.html")
 
-@app.route("/test-sprite")
-def test_sprite():
-	return render_template("test-sprite.html")
+@app.route("/draft")
+def draft():
+	return render_template("draft.html")
