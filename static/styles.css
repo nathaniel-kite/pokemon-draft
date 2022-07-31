@@ -41,6 +41,23 @@ h2 {
 	-ms-interpolation-mode: nearest-neighbor;
 }
 
+.sprite-gen-vii {
+	width: 120px;
+	height: 90px;
+}
+
+.sprite-gen-viii {
+	width: 204px;
+	height: 168;
+	margin: -72px 0px 0px -48px;
+}
+
+.crop-sprite {
+	width: 120px;
+	height: 90px;
+	overflow: hidden;
+}
+
 .stat-bar {
 	height: 1.4rem;
 	border-style: solid;
