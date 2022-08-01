@@ -1,3 +1,4 @@
+from random_pokemon import get_draft
 from flask import Flask, render_template
 
 app = Flask(__name__)
@@ -8,4 +9,4 @@ def home():
 
 @app.route("/draft")
 def draft():
-	return render_template("draft.html")
+	return render_template("draft.html", draft=get_draft())

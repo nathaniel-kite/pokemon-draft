@@ -1,4 +1,5 @@
 import random
+import json
 import pokebase as pb
 from requests.exceptions import HTTPError
 
@@ -62,6 +63,11 @@ def get_draft():
 		draft.append(families)
 
 	return draft
+
+
+def draft_json():
+	draft = get_draft()
+	jsonthing =  json.dumps([ob.__dict__ for ob in draft])
 
 	
 def print_draft():
