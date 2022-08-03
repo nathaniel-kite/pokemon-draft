@@ -9,4 +9,4 @@ def home():
 
 @app.route("/draft")
 def draft():
-	return render_template("draft.html", draft=get_draft())
+	return render_template("draft.html")
