@@ -18,18 +18,83 @@ h2 {
 	border-radius: 4px;
 }
 
-.grass-card {
-	background-color: #A7DB8D;
-	border-color: #498A29;
+.bug-card {
+	background-color: #cfff8f;
+	border-color: #498100;
+}
+
+.dark-card {
+	background-color: #bfb8b0;
+	border-color: #1c1108;
+}
+
+.dragon-card {
+	background-color: #d3b2ff;
+	border-color: #4e0b97;
+}
+
+.electric-card {
+	background-color: #f9ef71;
+	border-color: #9d7404;
+}
+
+.fighting-card {
+	background-color: #ff9191;
+	border-color: #810000;
+}
+
+.fire-card {
+	background-color: #ffc094;
+	border-color: #994600;
 }
 
 .ghost-card {
-	background-color: #b09dc5;
-	border-color: #705898;
+	background-color: #c2b2c3;
+	border-color: #4b356e;
+}
+
+.ground-card {
+	background-color: #ebd2a4;
+	border-color: #684400;
+}
+
+.grass-card {
+	background-color: #b5dda1;
+	border-color: #498A29;
+}
+
+.ice-card {
+	background-color: #c6e2ff;
+	border-color: #006bb7;
+}
+
+.normal-card {
+	background-color: #e7e6df;
+	border-color: #5c5c34;
+}
+
+.poison-card {
+	background-color: #edafe5;
+	border-color: #52037a;
+}
+
+.psychic-card {
+	background-color: #ff99b5;
+	border-color: #cf0069;
+}
+
+.rock-card {
+	background-color: #e1c99d;
+	border-color: #5e2a05;
+}
+
+.steel-card {
+    background-color: #cbcbcb;
+    border-color: #48434c;
 }
 
 .water-card {
-	background-color: #9DB7F5;
+	background-color: #B4CBFF;
 	border-color: #204eb8;
 }
 
@@ -42,20 +107,19 @@ h2 {
 }
 
 .sprite-gen-vii {
-	width: 120px;
+	width: 120;
 	height: 90px;
 }
 
 .sprite-gen-viii {
-	width: 204px;
-	height: 168;
-	margin: -72px 0px 0px -48px;
+	width: 136px;
+	height: 112px;
+	margin-top: -25px;
 }
 
-.crop-sprite {
+.sprite-container {
 	width: 120px;
 	height: 90px;
-	overflow: hidden;
 }
 
 .stat-bar {

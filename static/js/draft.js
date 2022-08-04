@@ -1,3 +1,4 @@
+// PokeAPI wrapper class
 const P = new Pokedex.Pokedex();
 
 // Restricted pokemon
@@ -13,12 +14,22 @@ const MYTHICAL = ["mew", "celebi", "jirachi", "deoxys", "phione", "darkrai", "sh
 // Pokemon that aren't restricted or mythical but should be removed from drafts
 const DISALLOWED = ["unown"];
 
+// These evolution chain IDs do not exist within the PokeAPI and shouldn't be called
+const INVALID_CHAIN_IDS = [210, 222, 225, 226, 227, 231, 238, 251];
+
 // The highest id of an evolution chain
 const EVOLUTION_CHAIN_MAX = 476;
 
-const draftSets = new Array(8)
+// Contains eight draft sets, each of which contains 4 evolution chains
+const draftSets = new Array(8);
 
-async function draft() {
+// Contains documentFragments which contain visual representations of the draft
+const draftDisplays = new Array(8);
+
+/**
+ * Populates draftSets with draft sets. Each draft set is an array of four evolution trees.
+ */
+async function makeDraft() {
 	// Make 8 draft sets, each containing 4 pokemon
 	for (let i = 0; i < 8; i++) {
 		let draftSet = new Array(4);
@@ -28,7 +39,13 @@ async function draft() {
 			generatorLoop: do {
 				try {
 					// Gets a random evolution chain from the API
-					let newChain = await P.getEvolutionChainById(Math.floor((Math.random() * EVOLUTION_CHAIN_MAX) + 1));
+					let newChain;
+					let randId = Math.floor((Math.random() * EVOLUTION_CHAIN_MAX) + 1);
+					if (!INVALID_CHAIN_IDS.includes(randId, 0)) {
+						newChain = await P.getEvolutionChainById(randId);
+					} else {
+						continue generatorLoop;
+					}
 
 					// Checks if the evolution chain is restricted, mythical, or disallowed
 					if (RESTRICTED.includes(newChain.chain.species.name) || MYTHICAL.includes(newChain.chain.species.name) || DISALLOWED.includes(newChain.chain.species.name)) {
@@ -51,14 +68,9 @@ async function draft() {
 
 				// If any error is caught, the loop automatically continues 
 				} catch (e) {
-
+					// Network requests are possible due to an API failure
 					if (e.message.includes('Request failed', 0)) {
-						// Log whether the error was expected (from calling the API with a bad id) or unexpected
-						if (e.message.includes('404', 0)) {
-							console.log('Error connecting to API. This is probably expected. Retrying...');
-						} else {
-							console.log('Unexpected error connecting to API. Retrying...');
-						}
+						console.log('Error connecting to API. Retrying...')
 					} else {
 						// Any non-network error is an issue with the code and should be re-thrown
 						throw e;
@@ -71,28 +83,86 @@ async function draft() {
 		console.log('draftSets[' + i + '] = ' + draftSet);
 		draftSets[i] = draftSet;
 	}
+}
 
-	// Create a string that's a list of all the pokemon picked in the draft
-	let newHtml = "";
+/**
+ * Returns a formatted card for an evolution chain.
+ * @param evolution_chain The evolution family to draw the card for
+ * @return The formatted card
+ */
+async function drawCard(evolution_chain) {
+	// Retrieve pokemon information
+	let pokemon = await getFinalEvolutionDefault(evolution_chain);
 
-	for (let i = 0; i < draftSets.length; i++) {
-		newHtml += '<p>Pick ' + i + ':</p>';
-		
-		for (let j = 0; j < draftSets[i].length; j++) {
-			let chain = draftSets[i][j].chain;
+	// Clone template for modification and remove id so the template can be accessed later
+	let card = $('#template').clone();
+	card.removeAttr('id');
 
-			while (chain.evolves_to.length != 0) {
-				chain = chain.evolves_to[0];
-			}
+	// Add name
+	card.find('#name strong').html(pokemon.species.name.replace('-', ' '));
 
-			newHtml += '<p>' + chain.species.name + '</p>';
-		}
-
-		newHtml += '<hr>';
+	// Add types
+	for (let i = 0; i < pokemon.types.length; i++) {
+		card.find('#types').append(`<img src="/static/img/${pokemon.types[i].type.name}.png" class="pixelate" width="64" height="28"></img>`);
 	}
 
-	// Update HTML to display draft
-	$("body").html(newHtml); 
+	// Modify card color to match type
+	card.addClass(`${pokemon.types[0].type.name}-card`);
+
+	// Add sprite, using the gen vii sprite if possible and gen viii if not
+	if (pokemon.sprites.versions['generation-vii'].icons.front_default != null) {
+		card.find('#sprite').append(`<img src="${pokemon.sprites.versions['generation-vii'].icons.front_default}" class="pixelate sprite-gen-vii">`);
+	} else {
+		card.find('#sprite').append(`<img src="${pokemon.sprites.versions['generation-viii'].icons.front_default}" class="pixelate sprite-gen-viii">`);
+	}
+
+	// Add abilities
+	for (let i = 0; i < pokemon.abilities.length; i++) {
+		card.find('#abilities').append(`<div class="col" style='text-transform:capitalize;'>${pokemon.abilities[i].ability.name.replace('-', ' ')}</div>`);
+	}
+
+	// Make new card visible
+	card.css('display', 'block');
+	return card;
+}
+
+/**
+ * Returns the final evolution species of an evolution chain.
+ * @param evolution_chain The evolution chain
+ * @return The species of its final evolution (NOT its pokemon)
+ */
+async function getFinalEvolutionDefault(evolution_chain) {
+	evolution_chain = evolution_chain.chain;
+
+	while (evolution_chain.evolves_to.length != 0) {
+		evolution_chain = evolution_chain.evolves_to[0];
+	}
+
+	// Get species from chain
+	let species = await P.getPokemonSpeciesByName(evolution_chain.species.name);
+	
+	// Get default form from species
+	for (let i = 0; i < species.varieties.length; i++) {
+		if (species.varieties[i].is_default) {
+			return await P.getPokemonByName(species.varieties[i].pokemon.name);
+		}
+	}
+	
+	// Throw error if no default form exists
+	throw `Species "${species.name}" has no default form!`;
+}
+
+/**
+ * Begins a draft.
+ */
+async function draft() {
+	$('body').prepend('<p id="loading" class="text-center">Loading...</p>');
+	await makeDraft();
+	$('#col-1').append(await drawCard(draftSets[0][0]));
+	$('#col-2').append(await drawCard(draftSets[0][1]));
+	$('#col-3').append(await drawCard(draftSets[0][2]));
+	$('#col-4').append(await drawCard(draftSets[0][3]));
+	$('#loading').remove();
 }
 
 draft();

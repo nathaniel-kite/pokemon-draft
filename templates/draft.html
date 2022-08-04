@@ -13,34 +13,31 @@
 		<title>Pokémon Draft</title>
 	</head>
 	<body>
-		<!--template-->
-		<div class="poke-card grass-card my-3 p-3 container-fluid" style="display: none;">
+		<div class="row">
+			<div id="col-1" class="col justify-content-center gap-3"></div>
+			<div id="col-2" class="col justify-content-center gap-3"></div>
+			<div id="col-3" class="col justify-content-center gap-3"></div>
+			<div id="col-4" class="col justify-content-center gap-3">
+			</div>
+		</div>
+		<!-- template -->
+		<div id="template" class="poke-card my-3 p-3 container-fluid" style="display: none;">
 			<div class="row items-align-center">
 				<div class="col d-flex flex-column justify-content-center gap-2">
 					<div>
-						<h2 class="text-center" style="text-transform: capitalize;"><strong>Breloom</strong></h2>
+						<h2 id="name" class="text-center" style="text-transform: capitalize;"><strong></strong></h2>
 					</div>
-					<div class="d-flex flex-row justify-content-center gap-3">
-						<img src="/static/types/grass.png" class="pixelate" width="64" height="28">
-						<img src="/static/types/fighting.png" class="pixelate" width="64" height="28">
+					<div id="types" class="d-flex flex-row justify-content-center gap-3">
 					</div>
 				</div>
 				<div class="col d-flex align-items-center justify-content-center">
-					<img src="/static/breloom_menu_icon.png" class="pixelate mx-auto" width="120" height="90">
+					<div id="sprite" class="sprite-container">
+					</div>
 				</div>
 			</div>
 			<hr>
 			<h3 class="text-center"><strong>Abilities</strong></h3>
-			<div class="row align-tems-center gx-3 text-center">
-				<div class="col">
-					Effect Spore
-				</div>
-				<div class="col">
-					Poison Heal
-				</div>
-				<div class="col">
-					Technician
-				</div>
+			<div id="abilities" class="row align-tems-center gx-3 text-center">
 			</div>
 			<hr>
 			<h3 class="text-center"><strong>Base Stats</strong></h3>
