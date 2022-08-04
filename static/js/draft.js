@@ -121,6 +121,14 @@ async function drawCard(evolution_chain) {
 		card.find('#abilities').append(`<div class="col" style='text-transform:capitalize;'>${pokemon.abilities[i].ability.name.replace('-', ' ')}</div>`);
 	}
 
+	// Add base stats
+	card.find('#hp').html(pokemon.stats[0].base_stat);
+	card.find('#atk').html(pokemon.stats[1].base_stat);
+	card.find('#def').html(pokemon.stats[2].base_stat);
+	card.find('#spa').html(pokemon.stats[3].base_stat);
+	card.find('#spd').html(pokemon.stats[4].base_stat);
+	card.find('#spe').html(pokemon.stats[5].base_stat);
+
 	// Make new card visible
 	card.css('display', 'block');
 	return card;

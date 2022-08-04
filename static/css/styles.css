@@ -19,7 +19,7 @@ h2 {
 }
 
 .bug-card {
-	background-color: #cfff8f;
+	background-color: #e9ff8f;
 	border-color: #498100;
 }
 
@@ -38,29 +38,39 @@ h2 {
 	border-color: #9d7404;
 }
 
+.fairy-card {
+	background-color: #ffb0dc;
+	border-color: #b7004c;
+}
+
 .fighting-card {
-	background-color: #ff9191;
-	border-color: #810000;
+	background-color: #ff867a;;
+	border-color: #642500;
 }
 
 .fire-card {
-	background-color: #ffc094;
-	border-color: #994600;
+	background-color: #ff976f;
+	border-color: #ad3b0f;
+}
+
+.flying-card {
+	background-color: #c6caff;
+	border-color: #473f74;
 }
 
 .ghost-card {
-	background-color: #c2b2c3;
+	background-color: #cba9cd;
 	border-color: #4b356e;
 }
 
 .ground-card {
-	background-color: #ebd2a4;
-	border-color: #684400;
+	background-color: #f5d18f;
+    border-color: #8d5c00;
 }
 
 .grass-card {
-	background-color: #b5dda1;
-	border-color: #498A29;
+	background-color: #98d779;
+	border-color: #2b7407;
 }
 
 .ice-card {
@@ -69,18 +79,18 @@ h2 {
 }
 
 .normal-card {
-	background-color: #e7e6df;
+	background-color: #d5d3c9;
 	border-color: #5c5c34;
 }
 
 .poison-card {
-	background-color: #edafe5;
+	background-color: #eba4e8;;
 	border-color: #52037a;
 }
 
 .psychic-card {
 	background-color: #ff99b5;
-	border-color: #cf0069;
+	border-color: #99014e;
 }
 
 .rock-card {
@@ -89,8 +99,8 @@ h2 {
 }
 
 .steel-card {
-    background-color: #cbcbcb;
-    border-color: #48434c;
+	background-color: #cbcbcb;
+	border-color: #48434c;
 }
 
 .water-card {
