@@ -1,3 +1,7 @@
+// Gradient for coloring the stat bars
+const STAT_BAR_GRADIENT = chroma.scale(['#930000', '#cc0000', '#f7000d', '#e3950e', '#d0fe40', '#3fda00', '#1dbd00', '#19a200',
+										'#237514', '#006917', '#004b1c']).mode('lrgb');
+
 // PokeAPI wrapper class
 const P = new Pokedex.Pokedex();
 
@@ -20,19 +24,29 @@ const INVALID_CHAIN_IDS = [210, 222, 225, 226, 227, 231, 238, 251];
 // The highest id of an evolution chain
 const EVOLUTION_CHAIN_MAX = 476;
 
+// Draft configuration - number of picks and options per pick
+const DRAFT_PICK_COUNT = 8;
+const DRAFT_OPTION_COUNT = 4;
+
 // Contains eight draft sets, each of which contains 4 evolution chains
-const draftSets = new Array(8);
+const draftSets = new Array(DRAFT_PICK_COUNT);
 
 // Contains documentFragments which contain visual representations of the draft
-const draftDisplays = new Array(8);
+const draftDisplays = new Array(DRAFT_PICK_COUNT);
+
+// Which pick the user is on
+var pick = 1;
+
+// List of chains that have been drafted for each pick
+const selections = new Array(DRAFT_PICK_COUNT);
 
 /**
  * Populates draftSets with draft sets. Each draft set is an array of four evolution trees.
  */
 async function makeDraft() {
 	// Make 8 draft sets, each containing 4 pokemon
-	for (let i = 0; i < 8; i++) {
-		let draftSet = new Array(4);
+	for (let i = 0; i < DRAFT_PICK_COUNT; i++) {
+		let draftSet = new Array(DRAFT_OPTION_COUNT);
 
 		for (let j = 0; j < 4; j++) {
 			// Generate pokemon until it generates a valid one
@@ -54,15 +68,22 @@ async function makeDraft() {
 
 					// Checks to see if the evolution chain is already in the draft set
 					for (let k = 0; k < i && !(i == 0 && j == 0); k++) {
-						for (let m = 0; m < j; m++) {
-							if (draftSets[k][m].id == newChain.id) {
-								continue generatorLoop;
+						if (k == i) {
+							for (let m = 0; m < j; m++) {
+								if (draftSets[k][m].id == newChain.id) {
+									continue generatorLoop;
+								}
+							}
+						} else {
+							for (let m = 0; m < 4; m++) {
+								if (draftSets[k][m].id == newChain.id) {
+									continue generatorLoop;
+								}
 							}
 						}
 					}
 
 					// Add the evolution chain to the draft set
-					console.log('draftSet[' + j + '] = ' + newChain.chain.species.name);
 					draftSet[j] = newChain;
 					break generatorLoop;
 
@@ -80,7 +101,6 @@ async function makeDraft() {
 		}
 
 		// Add draft set to the list of draft sets
-		console.log('draftSets[' + i + '] = ' + draftSet);
 		draftSets[i] = draftSet;
 	}
 }
@@ -90,20 +110,20 @@ async function makeDraft() {
  * @param evolution_chain The evolution family to draw the card for
  * @return The formatted card
  */
-async function drawCard(evolution_chain) {
+async function drawCard(evolution_chain, id) {
 	// Retrieve pokemon information
 	let pokemon = await getFinalEvolutionDefault(evolution_chain);
 
 	// Clone template for modification and remove id so the template can be accessed later
 	let card = $('#template').clone();
-	card.removeAttr('id');
+	card.attr('id', `${id}`);
 
 	// Add name
 	card.find('#name strong').html(pokemon.species.name.replace('-', ' '));
 
 	// Add types
 	for (let i = 0; i < pokemon.types.length; i++) {
-		card.find('#types').append(`<img src="/static/img/${pokemon.types[i].type.name}.png" class="pixelate" width="64" height="28"></img>`);
+		card.find('#types').append(`<img src="/static/img/${pokemon.types[i].type.name}.png" class="pixelate" width="64" height="28" alt="${pokemon.types[i].type.name}"></img>`);
 	}
 
 	// Modify card color to match type
@@ -118,10 +138,10 @@ async function drawCard(evolution_chain) {
 
 	// Add abilities
 	for (let i = 0; i < pokemon.abilities.length; i++) {
-		card.find('#abilities').append(`<div class="col" style='text-transform:capitalize;'>${pokemon.abilities[i].ability.name.replace('-', ' ')}</div>`);
+		card.find('#abilities').append(`<div class="col d-flex align-items-center text-center justify-content-center" style='text-transform:capitalize;'>${pokemon.abilities[i].ability.name.replace('-', ' ')}</div>`);
 	}
 
-	// Add base stats
+	// Add base stat numbers
 	card.find('#hp').html(pokemon.stats[0].base_stat);
 	card.find('#atk').html(pokemon.stats[1].base_stat);
 	card.find('#def').html(pokemon.stats[2].base_stat);
@@ -129,9 +149,60 @@ async function drawCard(evolution_chain) {
 	card.find('#spd').html(pokemon.stats[4].base_stat);
 	card.find('#spe').html(pokemon.stats[5].base_stat);
 
+	// Update base stat widths
+	card.find('#hp-bar').css('width', `${pokemon.stats[0].base_stat * 150 / 255}%`);
+	card.find('#atk-bar').css('width', `${pokemon.stats[1].base_stat * 150 / 255}%`);
+	card.find('#def-bar').css('width', `${pokemon.stats[2].base_stat * 150 / 255}%`);
+	card.find('#spa-bar').css('width', `${pokemon.stats[3].base_stat * 150 / 255}%`);
+	card.find('#spd-bar').css('width', `${pokemon.stats[4].base_stat * 150 / 255}%`);
+	card.find('#spe-bar').css('width', `${pokemon.stats[5].base_stat * 150 / 255}%`);
+
+	// Update base stat colors
+	card.find('#hp-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[0].base_stat / 255).toString());
+	card.find('#atk-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[1].base_stat / 255).toString());
+	card.find('#def-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[2].base_stat / 255).toString());
+	card.find('#spa-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[3].base_stat / 255).toString());
+	card.find('#spd-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[4].base_stat / 255).toString());
+	card.find('#spe-bar').css('background-color', STAT_BAR_GRADIENT(pokemon.stats[5].base_stat / 255).toString());
+
 	// Make new card visible
 	card.css('display', 'block');
 	return card;
+}
+
+/**
+ * Creates a docFragment with everything needed for a full draft pick and saves it to a 
+ */
+async function renderDraftDisplay(draftSet, index) {
+	let display = $(document.createDocumentFragment());
+
+	// Add row to append picks to
+	display.append('<div id="set-row" class="row gap-3"></div>');
+
+	// For each chain, append a column, a div to display which one is selected, and the card itself
+	for (let i = 0; i < draftSet.length; i++) {
+		display.find('#set-row').append(`<div id="col-${i}" class="col justify-content-center"></div>`);
+		display.find(`#col-${i}`).append(`<div id="select-${i}" class="my-3 selectable"></div>`);
+		display.find(`#select-${i}`).append(await drawCard(draftSet[i], i));
+		display.find(`#select-${i}`).click(select);
+	}
+
+	draftDisplays[index] = display;
+	return;
+}
+
+function select() {
+	// Unselect old selected
+	$('.selected').addClass('selectable');
+	$('.selected').removeClass('selected');
+
+	// Select new selected
+	$(this).removeClass('selectable');
+	$(this).addClass('selected');
+	
+	// Enable button
+	$('.btn').html(`Draft ${$(this).find('#name strong').html()}`);
+	$('.btn').prop('disabled', false);
 }
 
 /**
@@ -161,16 +232,54 @@ async function getFinalEvolutionDefault(evolution_chain) {
 }
 
 /**
+ * Progresses to the next pick.
+ */
+function nextPick() {
+	if (pick < DRAFT_PICK_COUNT) {
+
+		if (!(typeof draftDisplays[3] == 'undefined')) {
+			selections[pick - 1] = $('selected').attr('id');
+			pick++;
+			$('#set-row').remove();
+			$('#draft-container').prepend(draftDisplays[pick - 1]);
+			$('.btn').prop('disabled', true);
+			$('.btn').html('Select a Pokémon');
+		} else {
+			$('.btn').html('Loading...');
+			$('.btn').prop('disabled', true);
+			sleep(50).then(() => { nextPick(); });
+		}
+	} else {
+		selections[pick - 1] = $('selected').attr('id');
+		$('body').empty();
+		$('body').append('<p class="text-center">Draft complete!</p>')
+	}
+}
+
+/**
+ * setTimeouts a function to delay a function for some number of milliseconds.
+ */
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+/**
  * Begins a draft.
  */
 async function draft() {
-	$('body').prepend('<p id="loading" class="text-center">Loading...</p>');
+	$('.container').prepend('<p id="loading" class="text-center">Loading...</p>');
+	
 	await makeDraft();
-	$('#col-1').append(await drawCard(draftSets[0][0]));
-	$('#col-2').append(await drawCard(draftSets[0][1]));
-	$('#col-3').append(await drawCard(draftSets[0][2]));
-	$('#col-4').append(await drawCard(draftSets[0][3]));
+	await renderDraftDisplay(draftSets[0], 0);
+
+	for (let i = 0; i < draftSets.length; i++) {
+		renderDraftDisplay(draftSets[i], i);
+	}
+	
 	$('#loading').remove();
+	$('#draft-container').append(draftDisplays[0]);
+	$('#draft-container').append('<button class="btn btn-primary mx-auto" type="button" style="font-size:1.6rem;text-transform:capitalize;" disabled>Select a Pokémon</button>');
+	$('button').click(nextPick);
 }
 
 draft();
