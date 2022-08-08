@@ -13,7 +13,7 @@ const RESTRICTED = ["mewtwo", "lugia", "ho-oh", "kyogre", "groudon", "rayquaza",
 // Mythical pokemon
 const MYTHICAL = ["mew", "celebi", "jirachi", "deoxys", "phione", "darkrai", "shaymin", "arceus", "victini", "keldeo",
 				  "meloetta", "genesect", "diancie", "hoopa", "volcanion", "magearna", "marshadow", "zeraora", "meltan",
-				  "zarude"];
+				  "melmetal", "zarude"];
 
 // Pokemon that aren't restricted or mythical but should be removed from drafts
 const DISALLOWED = ["unown"];
@@ -67,6 +67,7 @@ async function makeDraft() {
 					}
 
 					// Checks to see if the evolution chain is already in the draft set
+					// TODO: There is a bug here that allows duplicates
 					for (let k = 0; k < i && !(i == 0 && j == 0); k++) {
 						if (k == i) {
 							for (let m = 0; m < j; m++) {
@@ -94,7 +95,9 @@ async function makeDraft() {
 						console.log('Error connecting to API. Retrying...')
 					} else {
 						// Any non-network error is an issue with the code and should be re-thrown
-						throw e;
+						$('body').empty();
+						$('body').append('<h1 style="text-align:center;">An unexpected error occured. Refreshing might fix it.</h1>');
+						$('body').append(`<p>Technical details: ${e}</p>`);
 					}
 				}
 			} while (true);
@@ -181,14 +184,20 @@ async function renderDraftDisplay(draftSet, index) {
 
 	// For each chain, append a column, a div to display which one is selected, and the card itself
 	for (let i = 0; i < draftSet.length; i++) {
-		display.find('#set-row').append(`<div id="col-${i}" class="col justify-content-center"></div>`);
-		display.find(`#col-${i}`).append(`<div id="select-${i}" class="my-3 selectable"></div>`);
+
+		// Add breakpoint to make display responsive
+		if (i == 2) {
+			display.find('#set-row').append('<div class="w-100 d-xl-none"</div>');
+		}
+
+		// Make a column, put a selectable div in it, make and put the card in the selectable div, then add the onClick function
+		display.find('#set-row').append(`<div id="col-${i}" class="col d-flex justify-content-center"></div>`);
+		display.find(`#col-${i}`).append(`<div id="select-${i}" class="my-3 flex-grow-1 selectable"></div>`);
 		display.find(`#select-${i}`).append(await drawCard(draftSet[i], i));
 		display.find(`#select-${i}`).click(select);
 	}
 
 	draftDisplays[index] = display;
-	return;
 }
 
 function select() {
@@ -237,16 +246,42 @@ async function getFinalEvolutionDefault(evolution_chain) {
 function nextPick() {
 	if (pick < DRAFT_PICK_COUNT) {
 
-		if (!(typeof draftDisplays[3] == 'undefined')) {
-			selections[pick - 1] = $('selected').attr('id');
+		// Update display if the next pick has already loaded
+		if (!(typeof draftDisplays[pick] == 'undefined')) {
+
+			// Record selection
+			selections[pick - 1] = $('.selected').attr('id');
+			
+			// Updates sprites to display previous picks
+			// Sizes new image based on class of the original image (gen-vii or gen-viii)
+			if ($('.selected #sprite img').hasClass('sprite-gen-viii')) {
+				$(`#pick-${pick}-sprite`).append(`<img src="${$('.selected #sprite img').attr('src')}" class="pixelate previous-pick-gen-viii"></img>`);
+			} else {
+				$(`#pick-${pick}-sprite`).append(`<img src="${$('.selected #sprite img').attr('src')}" class="pixelate previous-pick-gen-vii"></img>`);
+			}
+
 			pick++;
+
+			// Remove old draft and add new one
 			$('#set-row').remove();
 			$('#draft-container').prepend(draftDisplays[pick - 1]);
+
+			// Disable button
 			$('.btn').prop('disabled', true);
 			$('.btn').html('Select a Pokémon');
+		
+		// If the next pick hasn't loaded, try again until it has
 		} else {
+			// Remove selectable class from each pick and unbind the code that changes the pick
+			$('.selectable').unbind();
+			$('.selectable').css('padding', '8px');
+			$('.selectable').removeClass('selectable');
+
+			// Disable button
 			$('.btn').html('Loading...');
 			$('.btn').prop('disabled', true);
+
+			// Call function again after 50 ms
 			sleep(50).then(() => { nextPick(); });
 		}
 	} else {
@@ -267,7 +302,7 @@ function sleep(ms) {
  * Begins a draft.
  */
 async function draft() {
-	$('.container').prepend('<p id="loading" class="text-center">Loading...</p>');
+	$('#draft-container').prepend('<p id="loading" class="text-center">Loading...</p>');
 	
 	await makeDraft();
 	await renderDraftDisplay(draftSets[0], 0);
@@ -278,7 +313,6 @@ async function draft() {
 	
 	$('#loading').remove();
 	$('#draft-container').append(draftDisplays[0]);
-	$('#draft-container').append('<button class="btn btn-primary mx-auto" type="button" style="font-size:1.6rem;text-transform:capitalize;" disabled>Select a Pokémon</button>');
 	$('button').click(nextPick);
 }
 
