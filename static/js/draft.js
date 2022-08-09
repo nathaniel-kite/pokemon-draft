@@ -40,6 +40,9 @@ var pick = 1;
 // List of chains that have been drafted for each pick
 const selections = new Array(DRAFT_PICK_COUNT);
 
+// A list of prerendered cards for each of the selected pokemon
+const selectionCards = new Array(DRAFT_PICK_COUNT);
+
 /**
  * Populates draftSets with draft sets. Each draft set is an array of four evolution trees.
  */
@@ -67,18 +70,13 @@ async function makeDraft() {
 					}
 
 					// Checks to see if the evolution chain is already in the draft set
-					// TODO: There is a bug here that allows duplicates
-					for (let k = 0; k < i && !(i == 0 && j == 0); k++) {
-						if (k == i) {
-							for (let m = 0; m < j; m++) {
-								if (draftSets[k][m].id == newChain.id) {
-									continue generatorLoop;
-								}
-							}
-						} else {
-							for (let m = 0; m < 4; m++) {
-								if (draftSets[k][m].id == newChain.id) {
-									continue generatorLoop;
+					for (let k = 0; k < DRAFT_PICK_COUNT && !(i == 0 && j == 0); k++) {
+						if (typeof draftSets[k] != 'undefined') {
+							for (let m = 0; m < DRAFT_OPTION_COUNT; m++) {
+								if (typeof draftSets[k][m] != 'undefined') {
+									if (draftSets[k][m].id == newChain.id) {
+										continue generatorLoop;
+									}
 								}
 							}
 						}
@@ -94,10 +92,10 @@ async function makeDraft() {
 					if (e.message.includes('Request failed', 0)) {
 						console.log('Error connecting to API. Retrying...')
 					} else {
-						// Any non-network error is an issue with the code and should be re-thrown
+						// Any non-network error is an issue with the code and the user should be aleryted
 						$('body').empty();
 						$('body').append('<h1 style="text-align:center;">An unexpected error occured. Refreshing might fix it.</h1>');
-						$('body').append(`<p>Technical details: ${e}</p>`);
+						$('body').append(`<p style="text-align:center;">Technical details: ${e}</p>`);
 					}
 				}
 			} while (true);
@@ -250,7 +248,7 @@ function nextPick() {
 		if (!(typeof draftDisplays[pick] == 'undefined')) {
 
 			// Record selection
-			selections[pick - 1] = $('.selected').attr('id');
+			selections[pick - 1] = $('.selected').attr('id').slice(-1);
 			
 			// Updates sprites to display previous picks
 			// Sizes new image based on class of the original image (gen-vii or gen-viii)
@@ -259,8 +257,12 @@ function nextPick() {
 			} else {
 				$(`#pick-${pick}-sprite`).append(`<img src="${$('.selected #sprite img').attr('src')}" class="pixelate previous-pick-gen-vii"></img>`);
 			}
+		
+			renderSelection(pick - 1);
 
+			// Update pick number, update title
 			pick++;
+			$('#title strong').html(`PokéDraft - Pick ${pick}`);
 
 			// Remove old draft and add new one
 			$('#set-row').remove();
@@ -269,11 +271,11 @@ function nextPick() {
 			// Disable button
 			$('.btn').prop('disabled', true);
 			$('.btn').html('Select a Pokémon');
-		
 		// If the next pick hasn't loaded, try again until it has
 		} else {
 			// Remove selectable class from each pick and unbind the code that changes the pick
 			$('.selectable').unbind();
+			$('.selected').unbind();
 			$('.selectable').css('padding', '8px');
 			$('.selectable').removeClass('selectable');
 
@@ -286,8 +288,8 @@ function nextPick() {
 		}
 	} else {
 		selections[pick - 1] = $('selected').attr('id');
-		$('body').empty();
-		$('body').append('<p class="text-center">Draft complete!</p>')
+		displayEndPage();
+
 	}
 }
 
@@ -297,6 +299,25 @@ function nextPick() {
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+/**
+ * Looks at the 'selections' array, draws that card, then stores it in the selectionCards array
+ */
+async function renderSelection(id) {
+	let chain = draftSets[id][selections[id]];
+	selectionCards[id] = await drawCard(chain, id);
+}
+
+/**
+ * 
+ */
+function displayEndPage() {
+	$('body').empty();
+	for (let i = 0; i < DRAFT_PICK_COUNT; i++) {
+		$('body').append(selectionCards[i]);
+	}
+
+}
 
 /**
  * Begins a draft.
@@ -316,4 +337,8 @@ async function draft() {
 	$('button').click(nextPick);
 }
 
-draft();
+try {
+	draft();
+} catch (e) {
+	alert(`An unexpected error ocurred. Details: ${e}`);
+}
