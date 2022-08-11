@@ -1,31 +1,33 @@
-// Gradient for coloring the stat bars
+/**Gradient for coloring the stat bars.*/
 const STAT_BAR_GRADIENT = chroma.scale(['#930000', '#cc0000', '#f7000d', '#e3950e', '#d0fe40', '#3fda00', '#1dbd00', '#19a200',
 										'#237514', '#006917', '#004b1c']).mode('lrgb');
 
-// PokeAPI wrapper class
+/**PokeAPI wrapper class.*/
 const P = new Pokedex.Pokedex();
 
-// Restricted pokemon
+/**A list of restricted pokemon to be removed from the draft.*/
 const RESTRICTED = ["mewtwo", "lugia", "ho-oh", "kyogre", "groudon", "rayquaza", "dialga", "palkia", "giratina", "reshiram",
 					"zekrom", "kyurem", "xerneas", "yveltal", "zygarde", "cosmog", "cosmoem", "solgaleo", "lunala", "necrozma",
 					"zacian", "zamazenta", "eternatus", "calyrex"];
 
-// Mythical pokemon
+/**A list of mythical pokemon to be removed from the draft.*/
 const MYTHICAL = ["mew", "celebi", "jirachi", "deoxys", "phione", "darkrai", "shaymin", "arceus", "victini", "keldeo",
 				  "meloetta", "genesect", "diancie", "hoopa", "volcanion", "magearna", "marshadow", "zeraora", "meltan",
 				  "melmetal", "zarude"];
 
-// Pokemon that aren't restricted or mythical but should be removed from drafts
+/**A list of pokemon that aren't restricted or mythical but should be removed from drafts.*/
 const DISALLOWED = ["unown"];
 
-// These evolution chain IDs do not exist within the PokeAPI and shouldn't be called
+/**A list of evolution chain IDs that do not exist within the PokeAPI and shouldn't be called.*/
 const INVALID_CHAIN_IDS = [210, 222, 225, 226, 227, 231, 238, 251];
 
-// The highest id of an evolution chain
+/**The highest id of an evolution chain within PokeAPI's database.*/
 const EVOLUTION_CHAIN_MAX = 476;
 
-// Draft configuration - number of picks and options per pick
+/**Number of picks per draft. Can be changed to modify draft.*/
 const DRAFT_PICK_COUNT = 8;
+
+/**Number of options per pick. Can be changed to modify draft.*/
 const DRAFT_OPTION_COUNT = 4;
 
 // Contains eight draft sets, each of which contains 4 evolution chains
@@ -44,11 +46,12 @@ const selections = new Array(DRAFT_PICK_COUNT);
 const selectionCards = new Array(DRAFT_PICK_COUNT);
 
 /**
- * Populates draftSets with draft sets. Each draft set is an array of four evolution trees.
+ * Populates draftSets with draft sets. Each draft set is an array of four evolution chains.
  */
 async function makeDraft() {
 	// Make 8 draft sets, each containing 4 pokemon
 	for (let i = 0; i < DRAFT_PICK_COUNT; i++) {
+
 		let draftSet = new Array(DRAFT_OPTION_COUNT);
 
 		for (let j = 0; j < 4; j++) {
@@ -69,8 +72,17 @@ async function makeDraft() {
 						continue generatorLoop;
 					}
 
-					// Checks to see if the evolution chain is already in the draft set
-					for (let k = 0; k < DRAFT_PICK_COUNT && !(i == 0 && j == 0); k++) {
+					// Checks to see if the evolution chain is already within the new draft set
+					for (let k = 0; k < DRAFT_OPTION_COUNT; k++) {
+						if (typeof draftSet[k] != 'undefined') {
+							if (draftSet[k].id == newChain.id) {
+								continue generatorLoop;
+							}
+						}
+					}
+
+					// Checks to see if the evolution chain is already in earlier draft sets
+					for (let k = 0; k < DRAFT_PICK_COUNT /*&& !(i == 0 && j == 0)*/; k++) {
 						if (typeof draftSets[k] != 'undefined') {
 							for (let m = 0; m < DRAFT_OPTION_COUNT; m++) {
 								if (typeof draftSets[k][m] != 'undefined') {
@@ -120,7 +132,7 @@ async function drawCard(evolution_chain, id) {
 	card.attr('id', `${id}`);
 
 	// Add name
-	card.find('#name strong').html(pokemon.species.name.replace('-', ' '));
+	card.find('#name').html(pokemon.species.name.replace('-', ' '));
 
 	// Add types
 	for (let i = 0; i < pokemon.types.length; i++) {
@@ -172,7 +184,10 @@ async function drawCard(evolution_chain, id) {
 }
 
 /**
- * Creates a docFragment with everything needed for a full draft pick and saves it to a 
+ * Creates a docFragment with everything needed for a full draft pick and saves it to at draftDisplays at the specified
+ * index.
+ * @param draftSet the array of evolution chains to render the draft for
+ * @param index the index in draftDisplays where the rendered display should be saved
  */
 async function renderDraftDisplay(draftSet, index) {
 	let display = $(document.createDocumentFragment());
@@ -198,6 +213,10 @@ async function renderDraftDisplay(draftSet, index) {
 	draftDisplays[index] = display;
 }
 
+/**
+ * Removes the .selected class from selected objects, and gives it to calling object. Also enables and renames
+ * the button.
+ */
 function select() {
 	// Unselect old selected
 	$('.selected').addClass('selectable');
@@ -208,8 +227,8 @@ function select() {
 	$(this).addClass('selected');
 	
 	// Enable button
-	$('.btn').html(`Draft ${$(this).find('#name strong').html()}`);
-	$('.btn').prop('disabled', false);
+	$('#pick-button').html(`Draft ${$(this).find('#name').html()}`);
+	$('#pick-button').prop('disabled', false);
 }
 
 /**
@@ -241,7 +260,7 @@ async function getFinalEvolutionDefault(evolution_chain) {
 /**
  * Progresses to the next pick.
  */
-function nextPick() {
+async function nextPick() {
 	if (pick < DRAFT_PICK_COUNT) {
 
 		// Update display if the next pick has already loaded
@@ -262,15 +281,15 @@ function nextPick() {
 
 			// Update pick number, update title
 			pick++;
-			$('#title strong').html(`PokéDraft - Pick ${pick}`);
+			$('#title ').html(`PokéDraft - Pick ${pick}`);
 
 			// Remove old draft and add new one
 			$('#set-row').remove();
 			$('#draft-container').prepend(draftDisplays[pick - 1]);
 
 			// Disable button
-			$('.btn').prop('disabled', true);
-			$('.btn').html('Select a Pokémon');
+			$('#pick-button').prop('disabled', true);
+			$('#pick-button').html('Select a Pokémon');
 		// If the next pick hasn't loaded, try again until it has
 		} else {
 			// Remove selectable class from each pick and unbind the code that changes the pick
@@ -280,14 +299,15 @@ function nextPick() {
 			$('.selectable').removeClass('selectable');
 
 			// Disable button
-			$('.btn').html('Loading...');
-			$('.btn').prop('disabled', true);
+			$('#pick-button').html('Loading...');
+			$('#pick-button').prop('disabled', true);
 
 			// Call function again after 50 ms
 			sleep(50).then(() => { nextPick(); });
 		}
 	} else {
-		selections[pick - 1] = $('selected').attr('id');
+		selections[pick - 1] = $('.selected').attr('id').slice(-1);
+		await renderSelection(pick - 1);
 		displayEndPage();
 
 	}
@@ -301,7 +321,8 @@ function sleep(ms) {
   }
 
 /**
- * Looks at the 'selections' array, draws that card, then stores it in the selectionCards array
+ * Looks at the 'selections' array, draws the card at the specified id, then stores it in the selectionCards array.
+ * @param id the index in the selections array of the card to be rendered
  */
 async function renderSelection(id) {
 	let chain = draftSets[id][selections[id]];
@@ -309,32 +330,61 @@ async function renderSelection(id) {
 }
 
 /**
- * 
+ * Wipes the body and creates a new page filled with the cards in the selectionCards array.
  */
 function displayEndPage() {
-	$('body').empty();
+
+	// Empty draft
+	$('.container').empty();
+
+	// Add title, hr, and row to display previous picks
+	$('.container').append('<div class="py-2 text-center"><h1 id="title">Draft Complete!</h1><hr>');
+	$('.container').append('<div id="all-picks" class="row justify-content-center gy-2 py-2"></div>');
+
+	// Add cards for all previously picked pokemon
 	for (let i = 0; i < DRAFT_PICK_COUNT; i++) {
-		$('body').append(selectionCards[i]);
+
+		// Wrap lines for desktop every 4 picks, and for tablet every 2
+		if (i % 4 == 0 && i != 0) {
+			$('#all-picks').append('<div class="w-100"</div>');
+		} else if (i % 2 == 0 && i != 0) {
+			$('#all-picks').append('<div class="w-100 d-xl-none"</div>');
+		}
+
+		// Append column, then append the card to the column
+		$('#all-picks').append(`<div id="col-${i}" class="col d-flex justify-content-center"></div>`);
+		$(`#col-${i}`).append(selectionCards[i]);
 	}
 
+	$('.container').append('<hr><h2 class="py-2 text-center">Good luck!</h2><hr>');
 }
 
 /**
  * Begins a draft.
  */
 async function draft() {
-	$('#draft-container').prepend('<p id="loading" class="text-center">Loading...</p>');
-	
-	await makeDraft();
-	await renderDraftDisplay(draftSets[0], 0);
 
+	// Draw loading text and fill HTML with the correct number of sprite containers (to display picks)
+	$('#draft-container').append('<p id="loading" class="text-center">Loading...</p>');
+	for (let i = 0; i < DRAFT_PICK_COUNT; i++) {
+		$('#previous-picks').append(`<div class="col justify-content-center d-flex"><div id="pick-${i + 1}-sprite" class="previous-pick-container"></div></div>`);
+	}
+
+	// Make a draft
+	await makeDraft();
+
+	// Render and display the first draft sets
+	await renderDraftDisplay(draftSets[0], 0);
+	$('#draft-container').append(draftDisplays[0]);
+	$('#loading').remove();
+
+	// Render the rest of the draft sets
 	for (let i = 0; i < draftSets.length; i++) {
 		renderDraftDisplay(draftSets[i], i);
 	}
 	
-	$('#loading').remove();
-	$('#draft-container').append(draftDisplays[0]);
-	$('button').click(nextPick);
+	// Set pick button's onClick features
+	$('#pick-button').click(nextPick);
 }
 
 try {

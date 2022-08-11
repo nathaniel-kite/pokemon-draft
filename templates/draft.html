@@ -14,51 +14,23 @@
 		<title>Pokémon Draft</title>
 	</head>
 	<body>
-
 		<div class="container">
 			<div class="py-2 text-center">
-				<h1 id="title"><strong>PokéDraft - Pick 1</strong></h1>
+				<h1 id="title">PokéDraft - Pick 1</h1>
 				<hr>
 			</div>
-			<div id="draft-container" class="mx-2 d-flex flex-column justify-content-center">
-			</div>
+			<div id="draft-container" class="d-flex flex-column justify-content-center py-2 mx-2"></div>
 			<hr>
 			<div class="d-flex flex-column align-items-center">
 				<button id="pick-button" class="btn btn-primary my-3 mx-auto" type="button" disabled>Select a Pokémon</button>
 			</div>
 			<hr>
-		</div>
-		<div id="footer" class="d-flex flex-column align-items-center mt-auto">
-			<div class="row align-items-center py-2 gap-2">
-				<div class="col justify-content-center">
-					<div id="pick-1-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-2-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-3-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-4-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-5-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-6-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-7-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-				<div class="col justify-content-center">
-					<div id="pick-8-sprite" style="width:80px;height:60px;border:1px solid black;border-radius: 4px;"></div>
-				</div>
-			</div>
+			<div id="previous-picks" class="row align-items-center py-2 gap-2"></div>
+			<hr>
 		</div>
 		<!-- template -->
 		<div id="template" class="poke-card p-3 container-fluid" style="display: none;">
-			<h2 id="name" class="text-center" style="text-transform: capitalize;"><strong></strong></h2>
+			<h2 id="name" class="text-center" style="text-transform: capitalize;"></h2>
 			<hr>
 			<div class="row items-align-center pb-3">
 					<div id="sprite" class="sprite-container mx-auto">
@@ -69,11 +41,11 @@
 				</div>
 			</div>
 			<hr>
-			<h3 class="text-center"><strong>Abilities</strong></h3>
+			<h3 class="text-center">Abilities</h3>
 			<div id="abilities" class="row align-items-center gx-3 mb-2 text-center" style="height:5.3rem">
 			</div>
 			<hr>
-			<h3 class="text-center"><strong>Base Stats</strong></h3>
+			<h3 class="text-center">Base Stats</h3>
 			<div class="d-flex flex-column" style="font-family: 'Lato';">
 				<div class="row align-items-center">
 					<div class="col-2 text-end">
