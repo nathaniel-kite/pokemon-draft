@@ -51,4 +51,4 @@ Thank you to the contributors of the following libraries, which make this projec
 - [Flask](flask.palletsprojects.com), which can be used to host this website on a server
 - [chroma.js](https://gka.github.io/chroma.js/), which helps properly display the colors on the stat bars
 
-Developed by Nathaniel Kite. Licensed under GNU General Public License v3.0. See a short demonstration of the project [here](https://youtu.be/VC8aUjpnTp4).
+Developed by Nathaniel Kite. Licensed under GNU General Public License v3.0.
