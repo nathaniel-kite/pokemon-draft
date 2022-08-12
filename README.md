@@ -4,7 +4,7 @@ This website lets you simulate a Pokémon draft! Draft is designed as a format w
 
 Note: In order to actually build and battle with your teams, you'll need to use the official games or a site like [Pokémon Showdown](https://pokemonshowdown.com/).
 
-### How to draft
+### Accessing the draft:
 
 The website is hosted at [https://nathaniel-kite.github.io/pokemon-draft/draft/draft.html](https://nathaniel-kite.github.io/pokemon-draft/draft/draft.html), or you can clone this repository and run it locally. If you do, you'll need to make sure you install the requisite libraries (included at the bottom of this page). Once you've installed the three libraries, you can use `$ flask run` to launch the site.
 
