@@ -1,5 +1,7 @@
 # pokemon-draft
 
+**This project was completed before Generation 9 released and as a result, any Pokemon introduced in Gen 9 have broken sprites. I might go back and fix things at some point but there aren't any such plans for now. Everything else should still work fine, so please just disregard any graphical glitches!**
+
 This website lets you simulate a Pokémon draft! Draft is designed as a format where you can test your teambuilding skills against a friend. Other formats can get stale when playing against one person, since playing with the same teams can get boring. However, when drafting your team is quite limited; you'll need to get creative to make the strongest team you can!
 
 Note: In order to actually build and battle with your teams, you'll need to use the official games or a site like [Pokémon Showdown](https://pokemonshowdown.com/).
