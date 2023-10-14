@@ -72,11 +72,6 @@ async function makeDraft() {
 						continue generatorLoop;
 					}
 
-					// Checks if the pokemon is gen 9
-					if (newChain.chain.species.generation.name == "generation-ix") {
-						continue generatorLoop;
-					}
-
 					// Checks to see if the evolution chain is already within the new draft set
 					for (let k = 0; k < DRAFT_OPTION_COUNT; k++) {
 						if (typeof draftSet[k] != 'undefined') {
