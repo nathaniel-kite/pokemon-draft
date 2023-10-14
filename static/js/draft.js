@@ -72,6 +72,11 @@ async function makeDraft() {
 						continue generatorLoop;
 					}
 
+					// Checks if the pokemon is gen 9
+					if (newChain.chain.species.generation.name == "generation-ix") {
+						continue generatorLoop;
+					}
+
 					// Checks to see if the evolution chain is already within the new draft set
 					for (let k = 0; k < DRAFT_OPTION_COUNT; k++) {
 						if (typeof draftSet[k] != 'undefined') {
@@ -136,7 +141,7 @@ async function drawCard(evolution_chain, id) {
 
 	// Add types
 	for (let i = 0; i < pokemon.types.length; i++) {
-		card.find('#types').append(`<img src="/static/img/${pokemon.types[i].type.name}.png" class="pixelate" width="64" height="28" alt="${pokemon.types[i].type.name}"></img>`);
+		card.find('#types').append(`<img src="https://nathaniel-kite.github.io/pokemon-draft/static/img/${pokemon.types[i].type.name}.png" class="pixelate" width="64" height="28" alt="${pokemon.types[i].type.name}"></img>`);
 	}
 
 	// Modify card color to match type
